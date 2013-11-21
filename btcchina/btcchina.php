@@ -2,8 +2,8 @@
     function sign($method, $params = array()){
  
  
-        $accessKey = "d8c1efcc-9ed1-4bc6-bf48-226c56890ac5"; 
-        $secretKey = "33ca2d7d-2cf6-4f93-b24e-86ebc1c00e03"; 
+        $accessKey = ""; 
+        $secretKey = ""; 
  
         $mt = explode(' ', microtime());
         $ts = $mt[1] . substr($mt[0], 2, 6);
