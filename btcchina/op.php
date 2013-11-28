@@ -18,6 +18,7 @@ function buy(){
 	}
 	$param = array(floatval($_POST['price']), floatval($_POST['amount']));
 	$retJSON = request('buyOrder', $param);
+	//echo $retJSON;
 	$retArr = json_decode($retJSON, true);
 	if(isset($retArr['error']) || !isset($retArr['result'])){
 		return '0';
@@ -34,7 +35,7 @@ function sell(){
 	}
 	$param = array(floatval($_POST['price']), floatval($_POST['amount']));
 	$retJSON = request('sellOrder', $param);
-
+	//echo $retJSON;
 	$retArr = json_decode($retJSON, true);
 	if(isset($retArr['error']) || !isset($retArr['result'])){
 		return '0';
@@ -71,7 +72,7 @@ function cancelorder(){
 	}
 	$param = array(intval($_POST['id']));
 	$retJSON = request('cancelOrder',$param);
-	return $retJSON;
+
 	$retArr = json_decode($retJSON, true);
 	if(isset($retArr['error']) || !isset($retArr['result'])){
 		return '0';

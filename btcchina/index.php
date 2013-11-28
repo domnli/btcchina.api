@@ -4,6 +4,13 @@ include 'btcchina.php';
 $account_info = json_decode(request('getAccountInfo', array()), true);
 //$json_demo = '{"result":{"profile":{"username":"domnli","trade_password_enabled":true,"otp_enabled":false,"trade_fee":0,"daily_btc_limit":10,"btc_deposit_address":"14DYYjLB4XmJGvYWozamdFB5c3BWUn5XuG","btc_withdrawal_address":""},"balance":{"btc":{"currency":"BTC","symbol":"\u0e3f","amount":"0.91000000","amount_integer":"91000000","amount_decimal":8},"cny":{"currency":"CNY","symbol":"\u00a5","amount":"11.68800","amount_integer":"1168800","amount_decimal":5}},"frozen":{"btc":{"currency":"BTC","symbol":"\u0e3f","amount":"0.50000000","amount_integer":"50000000","amount_decimal":8},"cny":{"currency":"CNY","symbol":"\u00a5","amount":null,"amount_integer":"0","amount_decimal":5}}},"id":"1"}';
 //$account_info = json_decode($json_demo, true);
+if(!is_array($account_info)){
+  header("Content-Type: text/html; charset=utf-8");
+  echo 'api请求失败 :'.$account_info;
+  exit;
+}
+
+header("Pragma: no-cache");
 $profile_info = $account_info['result']['profile'];
 $balance_info = $account_info['result']['balance'];
 $frozen_info = $account_info['result']['frozen'];
@@ -15,6 +22,7 @@ $frozen_info = $account_info['result']['frozen'];
   <head>
     <title>BTCCHINA-董明理</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="pragma" content="no-cache" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.2/css/bootstrap.min.css">
@@ -27,34 +35,34 @@ $frozen_info = $account_info['result']['frozen'];
     <![endif]-->
   </head>
   <body>
-    <!-- ticker begin-->
-    <div style="min-height: 23px; background-color:#fafafa; border-bottom: 1px solid #D5D5D5;" class="header navbar navbar-inverse navbar-fixed-top">
-      <div class="row">
-        <div id="toast-container" class="toast-top-center">
-          <div class="toast toast" style="background:#4A5866;">
-            <div class="toast-message">
-              <div class="text-center" style="margin-bottom: 0; color: white; font-size: 12px;" id="ticker">
+    <div class="container">
+      <!-- ticker begin-->
+      <div style="min-height: 23px;" class="header navbar navbar-inverse">
+        <div class="row">
+          <div id="toast-container" class="toast-top-center">
+            <div class="toast toast">
+              <div class="toast-message">
+                <div class="text-center" style="margin-bottom: 0; color: white; font-size: 12px;padding:5px" id="ticker">
 
-                最新成交价：¥<span class="last" style="font-size: 16px;"></span>
-                <span class="spacer" style="padding-left: 15px"></span>
-                买一：¥<span class="buy" style="font-size: 16px;"></span>
-                <span class="spacer" style="padding-left: 15px"></span>
-                卖一：¥<span class="sell" style="font-size: 16px;"></span>
-                <span class="spacer" style="padding-left: 15px"></span>
-                最高：¥<span class="high" style="font-size: 16px;"></span>
-                <span class="spacer" style="padding-left: 15px"></span>
-                最低：¥<span class="low" style="font-size: 16px;"></span>
-                <span class="spacer" style="padding-left: 15px"></span>
-                成交量：฿<span class="vol" style="font-size: 16px;"></span>
+                  最新成交价：¥<span class="last" style="font-size: 16px;"></span>
+                  <span class="spacer" style="padding-left: 15px"></span><br/>
+                  买一：¥<span class="buy" style="font-size: 16px;"></span>
+                  <span class="spacer" style="padding-left: 15px"></span>
+                  卖一：¥<span class="sell" style="font-size: 16px;"></span>
+                  <span class="spacer" style="padding-left: 15px"></span><br/>
+                  最高：¥<span class="high" style="font-size: 16px;"></span>
+                  <span class="spacer" style="padding-left: 15px"></span>
+                  最低：¥<span class="low" style="font-size: 16px;"></span>
+                  <span class="spacer" style="padding-left: 15px"></span><br/>
+                  成交量：฿<span class="vol" style="font-size: 16px;"></span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- ticker end-->
+      <!-- ticker end-->
 
-    <div class="container" style="margin-top: 85px;">
       <!-- Nav tabs -->
       <ul class="nav nav-tabs">
         <li class="active"><a href="#accountpane" data-toggle="tab">账户</a></li>
@@ -70,11 +78,13 @@ $frozen_info = $account_info['result']['frozen'];
         <div class="tab-pane fade in active" id="accountpane">
           <p class="lead"><strong>用户名：<?php echo $profile_info['username']?></strong>&nbsp;</p>
           <h4>账户可用余额</h4>
-          <p><?php echo $balance_info['btc']['symbol'].'<strong>'.(empty($balance_info['btc']['amount'])?'0.00':$balance_info['btc']['amount']).'</strong>' ?>&nbsp;BTC</p>
-          <p><?php echo $balance_info['cny']['symbol'].'<strong>'.(empty($balance_info['cny']['amount'])?'0.00':$balance_info['cny']['amount']).'</strong>' ?>&nbsp;元</p>
+          <p><?php echo $balance_info['btc']['symbol'].'<strong id="current_btc_balance">'.(empty($balance_info['btc']['amount'])?'0.00':$balance_info['btc']['amount']).'</strong>' ?>&nbsp;BTC</p>
+          <p><?php echo $balance_info['cny']['symbol'].'<strong id="current_cny_balance">'.(empty($balance_info['cny']['amount'])?'0.00':$balance_info['cny']['amount']).'</strong>' ?>&nbsp;元</p>
           <h4>账户冻结金额</h4>
-          <p><?php echo $frozen_info['btc']['symbol'].'<strong>'.(empty($frozen_info['btc']['amount'])?'0.00':$frozen_info['btc']['amount']).'</strong>' ?>&nbsp;BTC</p>
-          <p><?php echo $frozen_info['cny']['symbol'].'<strong>'.(empty($frozen_info['cny']['amount'])?'0.00':$frozen_info['cny']['amount']).'</strong>' ?>&nbsp;元</p>
+          <p><?php echo $frozen_info['btc']['symbol'].'<strong id="current_btc_frozen">'.(empty($frozen_info['btc']['amount'])?'0.00':$frozen_info['btc']['amount']).'</strong>' ?>&nbsp;BTC</p>
+          <p><?php echo $frozen_info['cny']['symbol'].'<strong id="current_cny_frozen">'.(empty($frozen_info['cny']['amount'])?'0.00':$frozen_info['cny']['amount']).'</strong>' ?>&nbsp;元</p>
+          <h4>总资产折合人民币</h4>
+          <p>¥<strong id="current_desc">0</strong> 元</p>
           <button type="button" class="btn btn-primary refresh" onclick="javascript:window.location.reload();">刷新</button>
         </div>
         <!-- accountpane end -->
@@ -178,6 +188,8 @@ $frozen_info = $account_info['result']['frozen'];
                   if(data == '1'){
                     alert('下单成功');
                     window.location.reload();
+                  }else{
+                    alert('下单失败');
                   }
                 }
               });
@@ -206,6 +218,8 @@ $frozen_info = $account_info['result']['frozen'];
                   if(data == '1'){
                     alert('下单成功');
                     window.location.reload();
+                  }else{
+                    alert('下单失败');
                   }
                 }
               });
@@ -229,11 +243,12 @@ $frozen_info = $account_info['result']['frozen'];
               },
               success:function(data){
                 data = JSON.parse(data);
-                var tmpl = '<tr align="center" class="red"><td>%date%</td><td>买入</td><td>฿%amount_original%</td><td>¥%price%</td><td>฿%amount%</td><td>฿%amount_no%</td><td>%status%</td></tr>';
+                console.log(data);
+                var tmpl = '<tr align="center" class="red"><td>%date%</td><td>%type%</td><td>฿%amount_original%</td><td>¥%price%</td><td>฿%amount%</td><td>฿%amount_no%</td><td>%status%</td></tr>';
                 var html = '';
                 for(var i in data){
                     html += tmpl.replace('%date%', new Date(data[i].date * 1000).format('YYYY-MM-dd hh:mm:ss'))
-                                .replace('%type%', (data[i].type == 'bid'?'卖出':'买入'))
+                                .replace('%type%', (data[i].type == 'bid'?'买入':'卖出'))
                                 .replace('%amount_original%', data[i].amount_original)
                                 .replace('%price%', data[i].price)
                                 .replace('%amount%', data[i].amount_original - data[i].amount)
@@ -262,7 +277,7 @@ $frozen_info = $account_info['result']['frozen'];
       
       function cancel_order(dom,id){
         if(confirm('确定要撤单么？')){
-          $(this).attr('disabled','disabled');
+          $(dom).attr('disabled','disabled');
           $.ajax({
             url:'op.php?type=cancelorder',
             data:'id='+id,

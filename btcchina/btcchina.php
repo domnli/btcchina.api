@@ -1,22 +1,20 @@
 <?php
-    function sign($method, $params = array()){
+    function sign($method, $params = array(),$ts){
  
  
         $accessKey = ""; 
         $secretKey = ""; 
+        
  
-        $mt = explode(' ', microtime());
-        $ts = $mt[1] . substr($mt[0], 2, 6);
- 
-        $signature = http_build_query(array(
+     /*   $signature = http_build_query(array(
             'tonce' => $ts,
             'accesskey' => $accessKey,
             'requestmethod' => 'post',
-            'id' => 1,
+            'id' => $ts,
             'method' => $method,
-            'params' => '', //implode(',', $params),
-        ));
-        //var_dump($signature);
+            'params' => implode(',', $params),
+        ));*/
+        $signature = 'tonce='.$ts.'&accesskey='.$accessKey.'&requestmethod=post'.'&id='.$ts.'&method='.$method.'&params='.implode(',', $params);
  
         $hash = hash_hmac('sha1', $signature, $secretKey);
  
@@ -28,12 +26,15 @@
     }
  
     function request($method, $params){
-        $sign = sign($method, $params);
- 
+        $mt = explode(' ', microtime());
+        $ts = $mt[1] . substr($mt[0], 2, 6);
+
+        $sign = sign($method, $params,$ts);
+
         $postData = json_encode(array(
             'method' => $method,
             'params' => $params,
-            'id' => 1,
+            'id' => $ts,
         ));
         //print($postData);
 
@@ -52,9 +53,11 @@
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
- 
+
         // run the query
         $res = curl_exec($ch);
+
+echo curl_error($ch);
         return $res;
 
       }
